@@ -124,3 +124,8 @@ async def update_product(request:Request,product_id:int,stock:int,db:Session=Dep
         db.commit()
         return {'message':'Product succesfuly updated'}
     return {'message':'CSRF FAILED'}
+
+@router.get('/search')
+async def search(query:str,db:Session=Depends(get_db)):
+    results=list(db.query(Products).filter(Products.name.ilike(f"%{query}%")))
+    return results
