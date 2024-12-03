@@ -42,4 +42,14 @@ async def create_order(request:Request,order:orderBase,db:Session=Depends(get_db
         return{'message':'Order successfuly created'}
     return {'message':'CSRF FAILED'}
 
+@router.get('/get_orders',status_code=status.HTTP_200_OK)
+async def get_orders(request:Request,user_id:int,db:Session=Depends(get_db),user_auth:Users=Depends(current_user)):
+    orders_db=list(db.query(Orders).filter(Orders.user_id==user_id))
+    user_db=db.query(Users).filter(Users.id==user_id).first()
+    csrf_token_db=user_db.token
+    csrf_token_req=request.cookies.get('csrf_token')
+    if csrf_token_db==csrf_token_req:
+        return{'orders':orders_db}
+    return {'message':'CSRF FAILED'}
+
  
