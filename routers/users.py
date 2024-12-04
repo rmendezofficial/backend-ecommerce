@@ -36,6 +36,11 @@ class UserBase(BaseModel):
     username:str
     password:str
     email:str
+
+class PasswordBase(BaseModel):
+    contrasena_nueva:str
+    contrasena_nueva_2:str
+    user_id:int 
     
 @router.post('/create_user',status_code=status.HTTP_201_CREATED)
 async def create_user(user:UserBase,db:Session=Depends(get_db)):
@@ -170,4 +175,19 @@ async def pofile(request:Request,user_id:int,db:Session=Depends(get_db),user_aut
     csrf_token_req=request.cookies.get('csrf_token')
     if csrf_token_db==csrf_token_req:
         return {'message':'user','user':user_db}
+    return {'message':'CSRF FAILED'}
+
+@router.post('/change_password/',status_code=status.HTTP_200_OK)
+async def change_password(request:Request,passwordBase:PasswordBase,db:Session=Depends(get_db),user_auth:Users=Depends(current_user)):
+    newpassword1=passwordBase.contrasena_nueva
+    newpassword2=passwordBase.contrasena_nueva_2
+    user_db=db.query(Users).filter(Users.id==passwordBase.user_id).first()
+    csrf_token_db=user_db.token
+    csrf_token_req=request.cookies.get('csrf_token')
+    if csrf_token_db==csrf_token_req:
+        if newpassword1==newpassword2:
+            hashed_password = crypt.hash(user_db.password)
+            user_db.password = hashed_password
+            db.commit()
+        return {'message':'fail'}
     return {'message':'CSRF FAILED'}
