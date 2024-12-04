@@ -186,7 +186,7 @@ async def change_password(request:Request,passwordBase:PasswordBase,db:Session=D
     csrf_token_req=request.cookies.get('csrf_token')
     if csrf_token_db==csrf_token_req:
         if newpassword1==newpassword2:
-            hashed_password = crypt.hash(user_db.password)
+            hashed_password = crypt.hash(newpassword1)
             user_db.password = hashed_password
             db.commit()
         return {'message':'fail'}
