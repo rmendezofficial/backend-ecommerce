@@ -60,10 +60,12 @@ async def get_post(product_id:int,db:Session=Depends(get_db)):
     
     avg_stars_sum=0
     users_stars_num=0
-    for star in stars:
-        avg_stars_sum+=star.stars_number
-        users_stars_num+=1
-    avg_final=avg_stars_sum/users_stars_num
+    avg_final=0
+    if stars_num>0:
+                for star in stars:
+                    avg_stars_sum+=star.stars_number
+                    users_stars_num+=1
+                avg_final=avg_stars_sum/users_stars_num
     
     comments_final=[]
     for c in comments:
@@ -101,13 +103,14 @@ async def get_products(db:Session=Depends(get_db)):
             stars_num=len(stars)
             orders=list(db.query(Orders).filter(Orders.product_id==p.id))
             orders_num=len(orders)
-            
             avg_stars_sum=0
             users_stars_num=0
-            for star in stars:
-                avg_stars_sum+=star.stars_number
-                users_stars_num+=1
-            avg_final=avg_stars_sum/users_stars_num
+            avg_final=0
+            if stars_num>0:
+                for star in stars:
+                    avg_stars_sum+=star.stars_number
+                    users_stars_num+=1
+                avg_final=avg_stars_sum/users_stars_num
                     
             new_product={
                 'id':p.id,
