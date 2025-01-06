@@ -6,7 +6,7 @@ from database import engine,SessionLocal,Base
 from sqlalchemy.orm import Session
 import os
 from database import database_db
-from models import Users,Products,Comments,Stars
+from models import Users,Products,Comments,Stars,Orders
 from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from jose import jwt,JWTError
 from passlib.context import CryptContext
@@ -55,6 +55,15 @@ async def get_post(product_id:int,db:Session=Depends(get_db)):
     comments=list(db.query(Comments).filter(Comments.product_id==product_db.id))
     stars=list(db.query(Stars).filter(Stars.product_id==product_db.id))
     stars_num=len(stars)
+    orders=list(db.query(Orders).filter(Orders.product_id==product_id))
+    orders_num=len(orders)
+    
+    avg_stars_sum=0
+    users_stars_num=0
+    for star in stars:
+        avg_stars_sum+=star.stars_number
+        users_stars_num+=1
+    avg_final=avg_stars_sum/users_stars_num
     
     comments_final=[]
     for c in comments:
@@ -72,8 +81,10 @@ async def get_post(product_id:int,db:Session=Depends(get_db)):
         'comments_num':len(comments),
         'stars':stars_num,
         'stars_db':stars,
+        'stars_avg':avg_final,
         'price':product_db.price,
-        'stock':product_db.stock
+        'stock':product_db.stock,
+        'orders_num':orders_num
     }
     return prod_req
 
@@ -85,6 +96,19 @@ async def get_products(db:Session=Depends(get_db)):
         products_final=[]
         for p in products:
             user=db.query(Users).filter(Users.id==p.user_id).first()
+            
+            stars=list(db.query(Stars).filter(Stars.product_id==p.id))
+            stars_num=len(stars)
+            orders=list(db.query(Orders).filter(Orders.product_id==p.id))
+            orders_num=len(orders)
+            
+            avg_stars_sum=0
+            users_stars_num=0
+            for star in stars:
+                avg_stars_sum+=star.stars_number
+                users_stars_num+=1
+            avg_final=avg_stars_sum/users_stars_num
+                    
             new_product={
                 'id':p.id,
                 'name': p.name,
@@ -94,7 +118,11 @@ async def get_products(db:Session=Depends(get_db)):
                 'user_id': user.id,
                 'id': p.id,
                 'price':p.price,
-                'stock':p.stock
+                'stock':p.stock,
+                'stars':stars_num,
+                'stars_db':stars,
+                'stars_avg':avg_final,
+                'orders_num':orders_num
             }
             products_final.append(new_product)
             
