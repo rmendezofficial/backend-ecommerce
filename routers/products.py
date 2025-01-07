@@ -86,7 +86,8 @@ async def get_post(product_id:int,db:Session=Depends(get_db)):
         'stars_avg':avg_final,
         'price':product_db.price,
         'stock':product_db.stock,
-        'orders_num':orders_num
+        'orders_num':orders_num,
+        'orders':orders
     }
     return prod_req
 
