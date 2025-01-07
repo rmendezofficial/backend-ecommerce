@@ -29,6 +29,7 @@ class starBase(BaseModel):
     product_id:int
     user_id:int
     order_id:int
+    stars_number:int
   
 @router.post('/create_star',status_code=status.HTTP_201_CREATED)
 async def create_star(request:Request,star:starBase,db:Session=Depends(get_db),user_auth:Users=Depends(current_user)):
@@ -36,6 +37,11 @@ async def create_star(request:Request,star:starBase,db:Session=Depends(get_db),u
     csrf_token_db=user_db.token
     csrf_token_req=request.cookies.get('csrf_token')
     if csrf_token_db==csrf_token_req:
+        db_existent=db.query(Stars).filter(Stars.user_id==star.user_id,Stars.product_id==star.product_id).first()
+        if db_existent!=None:
+            db_existent.stars_number=star.stars_number
+            db.commit()
+            return{'message':'Star successfuly updated'}
         db_star=Stars(**star.model_dump())
         db.add(db_star)
         db.commit()
@@ -51,6 +57,6 @@ async def delete_user(request:Request,product_id:int,user_id:int,db:Session=Depe
         star_db=db.query(Stars).filter(Stars.user_id==user_id,Stars.product_id==product_id).first()
         db.delete(star_db)
         db.commit()
-        return {'message':'User succesfuly deleted'}
+        return {'message':'Star succesfuly deleted'}
     return {'message':'CSRF FAILED'}
 
