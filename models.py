@@ -57,3 +57,4 @@ class Stars(Base):
     product_id=Column(Integer)
     user_id=Column(Integer)
     order_id=Column(Integer)
+    stars_number=Column(Integer)
